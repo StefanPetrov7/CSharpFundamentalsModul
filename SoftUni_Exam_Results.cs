@@ -1,9 +1,12 @@
-﻿namespace Practice_2023;
+namespace Practice_2023;
 
 class SoftUni_Exam_Results
 {
     static void Main(string[] args)
     {
+
+        // 100 points, howevere Better data structure can be used, also problem description is not given clearly.
+
         const string PROGRAM_END = "exam finished";
         const string BANNED = "banned";
 
@@ -22,7 +25,6 @@ class SoftUni_Exam_Results
             if (command == BANNED)
             {
                 RemoveUser(userName, results);
-                Console.WriteLine($"{userName}-banned");
             }
             else
             {
@@ -31,25 +33,33 @@ class SoftUni_Exam_Results
             }
         }
 
-        Console.WriteLine("Results:");
+        Dictionary<string, int> finalResults = new Dictionary<string, int>();
 
-        foreach (var kvp in results)  // OrderByDescending(x => x.Value[x.Key.ToString()])) // fix the sorting 
+        foreach (var user in results)
         {
-            string user = kvp.Key;
-            int points = kvp.Value[user];
-            Console.WriteLine($"{user} | {points}");
+            string name = user.Key;
+
+            foreach (var languageResults in user.Value)
+            {
+                int points = languageResults.Value;
+
+                finalResults[name] = points;
+            }
         }
 
+        Console.WriteLine("Results:");
+
+        foreach (var kvp in finalResults.OrderByDescending(x => x.Value).ThenBy(x => x.Key))
+        {
+            Console.WriteLine($"{kvp.Key} | {kvp.Value}");
+        }
 
         Console.WriteLine("Submissions:");
 
-        foreach (var kvp in submissions)
+        foreach (var kvp in submissions.OrderByDescending(x => x.Value).ThenBy(x => x.Key))
         {
-            string language = kvp.Key;
-            int count = kvp.Value;
-            Console.WriteLine($"{language} - {count}");
+            Console.WriteLine($"{kvp.Key} - {kvp.Value}");
         }
-
     }
 
     private static void RemoveUser(string userName, Dictionary<string, Dictionary<string, int>> results)
@@ -69,7 +79,6 @@ class SoftUni_Exam_Results
 
         submissions[language]++;
 
-        submissions = submissions.OrderByDescending(x => x.Value).ThenBy(x => x.Key).ToDictionary(x => x.Key, y => y.Value);
     }
 
     private static void AddUser(string userName, string languages, int points, Dictionary<string, Dictionary<string, int>> results)
@@ -82,10 +91,13 @@ class SoftUni_Exam_Results
         if (results[userName].Any(x => x.Key == languages) == false)
         {
             results[userName][languages] = points;
+
         }
-
-        int oldPoints = results[userName][languages];  // not working 
-
-        results[userName][languages] = points > oldPoints ? points : oldPoints;
+        else
+        {
+            int oldPoints = results[userName][languages];
+            results[userName][languages] = points > oldPoints
+                ? results[userName][languages] = points : results[userName][languages] = oldPoints;
+        }
     }
 }
